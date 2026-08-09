@@ -118,6 +118,19 @@ This document records the prompt progression and AI-assisted pair-programming tr
 
 ---
 
+## 🔒 Final Documentation & Security Cleanup
+
+### Prompt
+> "FINAL DOCUMENTATION + SECURITY CLEANUP ONLY.
+> Scope:
+> - Remove CORSMiddleware entirely since the deployed architecture is same-origin (FastAPI serves static frontend at / and /static).
+> - Correct README.md LLM configuration wording to clearly distinguish OpenAI-compatible LLM credentials from Breeth credentials. Add note that Breeth credentials must not be placed into OPENAI_API_KEY.
+> - Explain same-origin deployment architecture and Render environment variable configuration.
+> - Append log entry to PROMPTS.md.
+> - Run full test suite, confirm 100% test pass, perform secret scan, and report git diff."
+
+---
+
 ## 🐛 Key Debugging & Refinement Prompts
 
 ### LLM Provider Offline Fail-Fast Optimization

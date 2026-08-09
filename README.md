@@ -29,6 +29,7 @@ During the interview, the central **Interview Controller** maintains complete st
 - **Evidence-Grounded Feedback**: Traces every feedback claim to verified exact candidate answer quotes (`candidate_quote`). Unverified LLM quotes are automatically discarded.
 - **Skipped vs. Gap Distinction**: Skipped curriculum missions are listed as unassessed study recommendations in `next[]`, NEVER as demonstrated weaknesses in `gaps[]`.
 - **Zero-Dependency Production Architecture**: Built with FastAPI, Pydantic v2, and standard Python libraries — no heavy agent frameworks, vector databases, or complex infrastructure required.
+- **Same-Origin Single-Package Deployment**: Frontend and API served from the same FastAPI origin, avoiding cross-origin deployment complexity.
 
 ---
 
@@ -42,8 +43,8 @@ During the interview, the central **Interview Controller** maintains complete st
                                                 │
                                                 ▼
 ┌──────────────────┐               ┌───────────────────────────┐
-│   Web Frontend   │◄──── HTTP ───►│    POST /api/interview    │
-│  (Single Page)   │               └─────────────┬─────────────┘
+│   Web Frontend   │◄── Same Origin ──► POST /api/interview    │
+│ (FastAPI Static) │               └─────────────┬─────────────┘
 └──────────────────┘                             │
                                                  ▼
                                    ┌───────────────────────────┐
@@ -69,9 +70,31 @@ During the interview, the central **Interview Controller** maintains complete st
 ## 💻 Technology Stack
 
 - **Backend**: Python 3.11+, FastAPI, Uvicorn, Pydantic v2, `pydantic-settings`
-- **LLM Provider**: OpenAI SDK (compatible with OpenAI GPT-4o-mini, Groq, Ollama, vLLM)
-- **Frontend**: Vanilla HTML5, CSS3 (Dark Slate Theme), ES6 JavaScript
+- **LLM Provider**: OpenAI-compatible client SDK (supports OpenAI GPT-4o-mini, Groq, Ollama, vLLM)
+- **Frontend**: Vanilla HTML5, CSS3 (Dark Slate Theme), ES6 JavaScript served directly via FastAPI `StaticFiles`
 - **Testing**: `pytest`, `pytest-asyncio`, `httpx`
+
+---
+
+## ⚙️ Environment Variables & LLM Provider Configuration
+
+The LLM provider abstraction uses standard OpenAI-compatible environment variables configured via `pydantic-settings`:
+
+| Environment Variable | Description | Default Value |
+| :--- | :--- | :--- |
+| `OPENAI_API_KEY` | Your OpenAI-compatible API key for LLM calls | `your-api-key-here` |
+| `OPENAI_BASE_URL` | Base URL for LLM provider API | `https://api.openai.com/v1` |
+| `LLM_MODEL` | Target model name | `gpt-4o-mini` |
+| `LLM_TEMPERATURE_QUESTION` | Temperature for question generation | `0.7` |
+| `LLM_TEMPERATURE_EVALUATION` | Temperature for answer evaluation | `0.2` |
+| `LLM_TEMPERATURE_FEEDBACK` | Temperature for feedback synthesis | `0.3` |
+| `LLM_MAX_RETRIES` | Bounded retries for failed LLM calls | `2` |
+| `LLM_TIMEOUT_SECONDS` | Timeout in seconds per LLM call | `30` |
+
+> [!NOTE]
+> **Important Credential Distinction**:
+> - **LLM Provider Credentials** (`OPENAI_API_KEY`, `OPENAI_BASE_URL`, `LLM_MODEL`) are used exclusively for question generation, answer evaluation, and feedback generation.
+> - **Breeth Credentials**: Breeth integration is not required for the core interview runtime in the current submission. Breeth credentials (`ck_live_...`) must **NOT** be placed into `OPENAI_API_KEY`.
 
 ---
 
@@ -95,15 +118,9 @@ pip install -r requirements.txt
 ```
 
 ### 3. Configure Environment Variables
-Copy `.env.example` to `.env` and add your OpenAI API key:
+Copy `.env.example` to `.env` and configure your OpenAI-compatible API key:
 ```bash
 cp .env.example .env
-```
-Edit `.env`:
-```ini
-OPENAI_API_KEY=your-actual-api-key-here
-OPENAI_BASE_URL=https://api.openai.com/v1
-LLM_MODEL=gpt-4o-mini
 ```
 
 ### 4. Run the Application Server
@@ -116,7 +133,7 @@ Open your browser and navigate to **`http://localhost:8000/`** to launch the int
 
 ## 🧪 Running Tests
 
-Run the comprehensive unit and end-to-end integration test suite:
+Run the complete test suite:
 ```bash
 pytest tests/
 ```
@@ -197,7 +214,7 @@ tests/test_phase6.py .                                                   [100%]
 ```
 
 ### 2. `GET /api/candidates`
-Returns the list of 20 candidate profiles from `candidates.json` for selection in the frontend UI.
+Returns the list of candidate profiles from `candidates.json` for selection in the frontend UI.
 
 ### 3. `GET /health`
 Exposes system operational status, curriculum load state, and active session count.
@@ -206,16 +223,22 @@ Exposes system operational status, curriculum load state, and active session cou
 
 ## ☁️ Deployment Instructions
 
-The application is fully configured for cloud platforms (Render, Railway, Heroku, AWS App Runner).
+The application is configured for deployment on cloud platforms such as Render, Railway, or AWS App Runner.
+
+### Same-Origin Architecture
+The deployed FastAPI application serves both the backend API and the static web frontend from the **same origin**. This eliminates cross-origin request issues and complex CORS configurations.
 
 ### Deploying to Render
 1. Push your repository to GitHub: `https://github.com/killer2611/ai-interview-agent`
 2. Create a new **Web Service** on Render connected to your repository.
-3. Render automatically detects `render.yaml` or set:
+3. Render detects `render.yaml` or set:
    - **Environment**: Python
    - **Build Command**: `pip install -r requirements.txt`
    - **Start Command**: `uvicorn src.main:app --host 0.0.0.0 --port $PORT`
-4. Set Environment Variable `OPENAI_API_KEY` in the Render dashboard.
+4. Set Environment Variables in your Render dashboard:
+   - `OPENAI_API_KEY`: Your OpenAI-compatible API key for live AI generation
+   - `OPENAI_BASE_URL`: `https://api.openai.com/v1`
+   - `LLM_MODEL`: `gpt-4o-mini`
 
 ---
 
