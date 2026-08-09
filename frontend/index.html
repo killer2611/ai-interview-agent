@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Interview Agent — Adaptive Technical Interview Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app" class="app-container">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">
+          <h1>The Interview Agent</h1>
+          <span class="sub-logo">Adaptive AI Technical Interviewer</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div id="session-badge" class="session-badge hidden">
+          <span class="status-dot"></span>
+          <span id="session-id-display">Session Active</span>
+        </div>
+        <button id="reset-btn" class="btn btn-secondary hidden" onclick="resetInterview()">
+          🔄 New Interview
+        </button>
+      </div>
+    </header>
+
+    <!-- Candidate Selection View -->
+    <section id="candidate-select-view" class="view-section active">
+      <div class="card select-card">
+        <div class="card-header">
+          <h2>Select a Candidate Profile</h2>
+          <p>Choose a candidate from the 31-day AI Cohort learning journey to begin a personalized technical interview.</p>
+        </div>
+        
+        <div class="candidate-picker">
+          <label for="candidate-dropdown">Select Candidate:</label>
+          <select id="candidate-dropdown" onchange="onCandidateSelect(this.value)">
+            <option value="" disabled selected>Loading candidates...</option>
+          </select>
+        </div>
+
+        <div id="candidate-detail" class="candidate-detail-box hidden">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="action-bar">
+          <button id="start-interview-btn" class="btn btn-primary btn-lg" onclick="startInterview()" disabled>
+            🚀 Start Personalized Interview
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Active Interview View -->
+    <section id="interview-view" class="view-section hidden">
+      <!-- Progress Bar -->
+      <div class="progress-bar-container">
+        <div class="progress-info">
+          <span id="progress-text">Question 1 of ~10</span>
+          <span id="progress-percentage">10%</span>
+        </div>
+        <div class="progress-track">
+          <div id="progress-fill" class="progress-fill" style="width: 10%;"></div>
+        </div>
+      </div>
+
+      <!-- Main Chat Area -->
+      <div class="chat-container">
+        <div id="chat-messages" class="chat-messages">
+          <!-- Messages inserted dynamically -->
+        </div>
+        
+        <div id="typing-indicator" class="typing-indicator hidden">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <span>Interviewer is evaluating your response and formulating the next question...</span>
+        </div>
+      </div>
+
+      <!-- Error Banner -->
+      <div id="error-banner" class="error-banner hidden">
+        <span id="error-text">Network error. Please try again.</span>
+        <button class="btn-text" onclick="dismissError()">✕</button>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="input-container">
+        <textarea 
+          id="answer-input" 
+          placeholder="Type your technical response here... (Press Shift+Enter for newline, Enter to submit)"
+          rows="3"
+        ></textarea>
+        <button id="submit-answer-btn" class="btn btn-primary" onclick="submitAnswer()">
+          <span>Submit Answer</span>
+          <span class="btn-icon">➔</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Completion / Feedback View -->
+    <section id="completion-view" class="view-section hidden">
+      <div class="card feedback-card">
+        <div class="feedback-header">
+          <div class="badge badge-success">Interview Complete</div>
+          <h2>Technical Interview Evaluation Report</h2>
+          <p id="feedback-candidate-info">Candidate Assessment</p>
+        </div>
+
+        <!-- Summary -->
+        <div class="feedback-section summary-section">
+          <h3>📋 Executive Summary</h3>
+          <p id="feedback-summary-text" class="summary-text"></p>
+        </div>
+
+        <div class="feedback-grid">
+          <!-- Strengths -->
+          <div class="feedback-box strength-box">
+            <h3>✅ Demonstrated Strengths</h3>
+            <ul id="feedback-strengths-list" class="feedback-list"></ul>
+          </div>
+
+          <!-- Demonstrated Gaps -->
+          <div class="feedback-box gap-box">
+            <h3>⚠️ Demonstrated Gaps</h3>
+            <ul id="feedback-gaps-list" class="feedback-list"></ul>
+          </div>
+        </div>
+
+        <!-- Next Steps & Unassessed Areas -->
+        <div class="feedback-section next-section">
+          <h3>🎯 Actionable Next Steps & Study Recommendations</h3>
+          <ul id="feedback-next-list" class="feedback-list"></ul>
+        </div>
+
+        <div class="feedback-actions">
+          <button class="btn btn-primary btn-lg" onclick="resetInterview()">
+            🔄 Conduct Another Interview
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
